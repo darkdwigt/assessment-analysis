@@ -299,13 +299,15 @@ export default function App() {
     const maxRetries = 5;
     const delays = [1000, 2000, 4000, 8000, 16000];
     let success = false;
+    
     const activeKey = userApiKey || apiKey;
+    // SMART SWITCH: Use public model for user keys, use preview model for internal environment
+    const modelEndpoint = userApiKey ? "gemini-1.5-flash" : "gemini-2.5-flash-preview-09-2025";
 
     while (attempt < maxRetries && !success) {
       try {
-        // FIXED: Switched endpoint to the standard gemini-1.5-flash model to prevent 404 errors with public API keys
         const response = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${activeKey}`,
+          `https://generativelanguage.googleapis.com/v1beta/models/${modelEndpoint}:generateContent?key=${activeKey}`,
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -376,8 +378,8 @@ export default function App() {
   return (
     <div className="cyber-root" style={{ position: 'absolute', top: 0, left: 0, width: '100%', minHeight: '100vh', backgroundColor: '#050508', backgroundImage: 'none', margin: 0, padding: 0, overflowX: 'hidden' }}>
       <style dangerouslySetInnerHTML={{ __html: `
-        /* Import Roboto for better readability */
-        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+        /* Import Inter for ultra-clean, modern, highly readable typography */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
         /* Target global html, body, and Next.js root element */
         html, body, #__next {
@@ -400,8 +402,9 @@ export default function App() {
           min-height: 100vh;
           width: 100%;
           color: #ffffff;
-          font-family: 'Roboto', system-ui, sans-serif; /* CHANGED TO ROBOTO */
+          font-family: 'Inter', system-ui, -apple-system, sans-serif; /* CHANGED TO INTER */
           padding-bottom: 4rem;
+          line-height: 1.5;
         }
 
         .cyber-layout {
@@ -483,7 +486,7 @@ export default function App() {
           backdrop-filter: blur(10px);
           border: 1px solid #1f1f2e;
           padding: 1.5rem;
-          border-radius: 4px;
+          border-radius: 6px;
           margin-bottom: 1.5rem;
         }
         .panel-title {
@@ -506,7 +509,7 @@ export default function App() {
           text-align: center;
           cursor: pointer;
           transition: all 0.2s ease;
-          border-radius: 4px;
+          border-radius: 6px;
         }
         .upload-zone:hover, .upload-zone.drag-active {
           border-color: #06b6d4;
@@ -520,7 +523,7 @@ export default function App() {
           font-family: 'SF Mono', 'Courier New', Courier, monospace;
         }
         .upload-subtext {
-          font-size: 0.75rem;
+          font-size: 0.8rem;
           color: #64748b;
         }
 
@@ -529,10 +532,10 @@ export default function App() {
           background: #050508;
           border: 1px solid #2d2d3b;
           color: #ffffff;
-          font-family: 'Roboto', system-ui, sans-serif;
+          font-family: 'Inter', system-ui, sans-serif;
           padding: 0.85rem;
-          font-size: 0.85rem;
-          border-radius: 4px;
+          font-size: 0.9rem;
+          border-radius: 6px;
           box-sizing: border-box;
           margin-bottom: 1rem;
           transition: border-color 0.2s ease;
@@ -544,7 +547,7 @@ export default function App() {
         textarea.cyber-input {
           resize: vertical;
           min-height: 120px;
-          line-height: 1.5;
+          line-height: 1.6;
         }
 
         /* --- Buttons --- */
@@ -552,15 +555,15 @@ export default function App() {
           background: transparent;
           border: 1px solid #06b6d4;
           color: #06b6d4;
-          font-family: 'Roboto', system-ui, sans-serif;
+          font-family: 'Inter', system-ui, sans-serif;
           padding: 1rem 1.5rem;
-          font-size: 0.85rem;
-          font-weight: bold;
-          letter-spacing: 1px;
+          font-size: 0.9rem;
+          font-weight: 600;
+          letter-spacing: 0.5px;
           cursor: pointer;
           width: 100%;
           transition: all 0.2s ease;
-          border-radius: 2px;
+          border-radius: 4px;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -580,12 +583,13 @@ export default function App() {
           background: transparent;
           border: 1px solid #2d2d3b;
           color: #a1a1aa;
-          font-family: 'Roboto', system-ui, sans-serif;
+          font-family: 'Inter', system-ui, sans-serif;
           padding: 0.35rem 0.85rem;
-          font-size: 0.75rem;
+          font-size: 0.8rem;
+          font-weight: 500;
           cursor: pointer;
           transition: all 0.2s ease;
-          border-radius: 2px;
+          border-radius: 4px;
         }
         .btn-small:hover {
           color: #ffffff;
@@ -617,14 +621,15 @@ export default function App() {
           border: 1px solid #1f1f2e;
           padding: 1.25rem 1rem;
           text-align: center;
-          border-radius: 4px;
+          border-radius: 6px;
         }
         .metric-card.off-target {
           border-color: #ef4444;
           background: rgba(239, 68, 68, 0.05);
         }
         .metric-label {
-          font-size: 0.7rem;
+          font-size: 0.75rem;
+          font-weight: 500;
           color: #64748b;
           margin-bottom: 0.75rem;
           display: block;
@@ -669,7 +674,8 @@ export default function App() {
         .progress-text {
           display: flex;
           justify-content: space-between;
-          font-size: 0.65rem;
+          font-size: 0.7rem;
+          font-weight: 500;
           margin-top: 0.5rem;
           color: #64748b;
         }
@@ -682,11 +688,11 @@ export default function App() {
         .cyber-table {
           width: 100%;
           border-collapse: collapse;
-          font-size: 0.85rem;
+          font-size: 0.9rem;
         }
         .cyber-table th {
           color: #64748b;
-          font-weight: normal;
+          font-weight: 500;
           text-align: left;
           padding: 1rem;
           border-bottom: 1px solid #2d2d3b;
@@ -701,37 +707,40 @@ export default function App() {
           background: rgba(255,255,255,0.02);
         }
         .level-badge {
-          font-size: 0.7rem;
+          font-size: 0.75rem;
+          font-weight: 600;
           padding: 0.25rem 0.5rem;
           border: 1px solid #2d2d3b;
-          border-radius: 2px;
+          border-radius: 4px;
           background: #050508;
           color: #a1a1aa;
         }
 
         /* --- Utility --- */
         .status-msg {
-          font-size: 0.8rem;
+          font-size: 0.85rem;
+          font-weight: 500;
           color: #06b6d4;
           margin-top: 1rem;
           text-align: center;
           font-family: 'SF Mono', 'Courier New', Courier, monospace;
         }
         .error-msg {
-          font-size: 0.8rem;
+          font-size: 0.85rem;
+          font-weight: 500;
           color: #ef4444;
           border: 1px solid #ef4444;
           background: rgba(239, 68, 68, 0.1);
           padding: 1rem;
           margin-top: 1rem;
-          border-radius: 4px;
+          border-radius: 6px;
         }
         .flex-wrap { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem; }
         .info-box {
           background: #050508;
           border: 1px solid #2d2d3b;
           padding: 1.25rem;
-          border-radius: 4px;
+          border-radius: 6px;
         }
       ` }} />
 
@@ -779,7 +788,7 @@ export default function App() {
               </div>
               
               {files.length > 0 && (
-                <div style={{ marginTop: '1rem', fontSize: '0.8rem', color: '#06b6d4' }}>
+                <div style={{ marginTop: '1rem', fontSize: '0.85rem', fontWeight: 500, color: '#06b6d4' }}>
                   {'>'} {files.length} FILE(S) QUEUED ({images.length} PAGES, {texts.length} DOCS)
                 </div>
               )}
@@ -801,7 +810,7 @@ export default function App() {
                 </label>
               </div>
               
-              <label style={{ display: 'block', fontSize: '0.75rem', color: '#64748b', marginBottom: '0.5rem' }}>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#64748b', marginBottom: '0.5rem' }}>
                 GEMINI_API_KEY:
               </label>
               <input 
@@ -812,7 +821,7 @@ export default function App() {
                 placeholder="Enter Gemini API Key..."
               />
               
-              <label style={{ display: 'block', fontSize: '0.75rem', color: '#64748b', marginBottom: '0.5rem' }}>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#64748b', marginBottom: '0.5rem' }}>
                 TARGET_MATRIX:
               </label>
               <select 
@@ -825,7 +834,7 @@ export default function App() {
                 <option value="math">MATHEMATICS (P1 & P2)</option>
               </select>
 
-              <label style={{ display: 'block', fontSize: '0.75rem', color: '#64748b', marginBottom: '0.5rem' }}>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#64748b', marginBottom: '0.5rem' }}>
                 CURRICULUM_TOPICS:
               </label>
               <textarea 
@@ -856,7 +865,7 @@ export default function App() {
                 <div style={{ color: '#64748b', marginBottom: '1rem', letterSpacing: '2px', fontFamily: "'SF Mono', 'Courier New', Courier, monospace" }}>
                   [ AWAITING INPUT DATA ]
                 </div>
-                <p style={{ color: '#a1a1aa', fontSize: '0.9rem', lineHeight: '1.5' }}>
+                <p style={{ color: '#a1a1aa', fontSize: '0.95rem', lineHeight: '1.6' }}>
                   Upload an assessment on the left to generate the cognitive mapping grid.
                 </p>
               </div>
@@ -915,11 +924,11 @@ export default function App() {
                       <tbody>
                         {results.map((q, idx) => (
                           <tr key={idx}>
-                            <td style={{ color: '#ffffff' }}>{q.qNum}</td>
+                            <td style={{ color: '#ffffff', fontWeight: 500 }}>{q.qNum}</td>
                             <td>{q.topic}</td>
-                            <td style={{ color: '#06b6d4', fontWeight: 'bold' }}>{q.marks}</td>
+                            <td style={{ color: '#06b6d4', fontWeight: 700 }}>{q.marks}</td>
                             <td><span className="level-badge">L{q.blooms}</span></td>
-                            <td style={{ color: '#a1a1aa', fontSize: '0.8rem', lineHeight: '1.4' }}>{q.description}</td>
+                            <td style={{ color: '#a1a1aa', fontSize: '0.85rem', lineHeight: '1.5' }}>{q.description}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -932,7 +941,7 @@ export default function App() {
                   <h2 className="panel-title">// TARGETED_REVISION_GENERATOR</h2>
                   
                   <div style={{ marginBottom: '1.5rem' }}>
-                    <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.75rem' }}>
+                    <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#64748b', marginBottom: '0.75rem' }}>
                       FILTER_BY_TOPIC:
                     </div>
                     <div className="flex-wrap">
@@ -947,7 +956,7 @@ export default function App() {
                       ))}
                     </div>
 
-                    <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.75rem', marginTop: '1rem' }}>
+                    <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#64748b', marginBottom: '0.75rem', marginTop: '1rem' }}>
                       FILTER_BY_LEVEL:
                     </div>
                     <div className="flex-wrap">
@@ -965,7 +974,7 @@ export default function App() {
 
                   <div className="info-box">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                      <span style={{ fontSize: '0.8rem', color: '#06b6d4', letterSpacing: '1px' }}>OUTPUT:</span>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#06b6d4', letterSpacing: '1px' }}>OUTPUT:</span>
                       <button 
                         onClick={() => {
                           navigator.clipboard.writeText(generateRevisionPlan());
@@ -977,7 +986,7 @@ export default function App() {
                         [ COPY ]
                       </button>
                     </div>
-                    <p style={{ margin: 0, fontSize: '0.85rem', lineHeight: '1.5', color: '#e2e8f0' }}>
+                    <p style={{ margin: 0, fontSize: '0.9rem', lineHeight: '1.6', color: '#e2e8f0' }}>
                       {generateRevisionPlan() || "Select filters above to isolate questions for targeted revision."}
                     </p>
                   </div>
