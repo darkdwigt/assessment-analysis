@@ -32,8 +32,15 @@ export default function App() {
     math: ["Knowledge", "Routine Procedures", "Complex Procedures", "Problem Solving"]
   };
 
-  // Load external parsers dynamically
+  // Load external parsers dynamically and force global body styles
   useEffect(() => {
+    // Force override Next.js default margins and backgrounds
+    document.documentElement.style.backgroundColor = "#050508";
+    document.body.style.backgroundColor = "#050508";
+    document.body.style.margin = "0";
+    document.body.style.padding = "0";
+    document.body.style.backgroundImage = "none";
+
     const scriptPdf = document.createElement('script');
     scriptPdf.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
     scriptPdf.async = true;
@@ -359,11 +366,13 @@ export default function App() {
 
   return (
     <div className="cyber-root">
-      <style>{`
-        body {
-          margin: 0;
-          padding: 0;
-          background-color: #050508;
+      <style dangerouslySetInnerHTML={{ __html: `
+        /* Target global html and body to firmly remove browser margins and background lines */
+        html, body {
+          margin: 0 !important;
+          padding: 0 !important;
+          background-color: #050508 !important;
+          background-image: none !important;
         }
 
         .cyber-root {
@@ -702,7 +711,7 @@ export default function App() {
           padding: 1.25rem;
           border-radius: 4px;
         }
-      `}</style>
+      ` }} />
 
       <div className="cyber-layout">
         <header>
