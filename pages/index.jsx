@@ -360,11 +360,15 @@ export default function App() {
   return (
     <div className="cyber-root">
       <style>{`
+        body {
+          margin: 0;
+          padding: 0;
+          background-color: #050508;
+        }
+
         .cyber-root {
           /* Enforce dark background on the outermost wrapper to prevent white flashes or body overrides */
           background-color: #050508;
-          background-image: linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-          background-size: 50px 100%;
           min-height: 100vh;
           width: 100%;
           color: #ffffff;
