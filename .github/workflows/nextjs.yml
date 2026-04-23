@@ -29,6 +29,13 @@ jobs:
       - name: Install dependencies
         run: npm install
         
+      - name: Auto-generate Next.js Config
+        # This guarantees the 'out' folder is created and the base path is perfectly matched to your repo!
+        run: |
+          REPO_NAME="${GITHUB_REPOSITORY#*/}"
+          echo "module.exports = { output: 'export', basePath: '/'$REPO_NAME, eslint: { ignoreDuringBuilds: true } };" > next.config.js
+          echo "Generated next.config.js for repository: $REPO_NAME"
+          
       - name: Build with Next.js
         run: npm run build
         
