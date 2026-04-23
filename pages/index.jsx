@@ -326,6 +326,7 @@ export default function App() {
 
           if (!response.ok) {
             if (response.status === 404) throw new Error("MODEL_404");
+            if (response.status === 429) throw new Error("RATE_LIMIT");
             if (response.status === 403) throw new Error("API Error 403: Forbidden. Your key may lack permissions or be region-locked.");
             if (response.status === 400) throw new Error("API Error 400: Bad Request. Check if the API key is correct.");
             throw new Error(`API Error ${response.status}: ${response.statusText}`);
@@ -344,7 +345,11 @@ export default function App() {
         } catch (err) {
           if (err.message === "MODEL_404") {
             finalError = `ERROR: Model ${modelEndpoint} not found.`;
-            break; // Break the while loop to try the next model in the for loop
+            break;
+          }
+          if (err.message === "RATE_LIMIT") {
+            finalError = "ERROR: Rate limit exceeded. Please wait a moment and try again, or use a different API key.";
+            break;
           }
           
           attempt++;
