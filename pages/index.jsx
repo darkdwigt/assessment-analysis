@@ -301,10 +301,15 @@ export default function App() {
     // STRICT TRIM: Removes invisible spaces that break the URL and cause 404 errors
     const activeKey = (userApiKey || apiKey).trim();
     
-    // SMART FALLBACK: Google's endpoint availability varies. 
-    // This array automatically tries the most stable public models first!
+    // SMART FALLBACK: Google's endpoint availability varies depending on your region and account age. 
+    // We are now targeting the absolute latest 2.5 and 2.0 models, plus the preview model as a failsafe!
     const modelsToTry = userApiKey 
-      ? ["gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-pro", "gemini-1.0-pro"] 
+      ? [
+          "gemini-2.5-flash", 
+          "gemini-2.0-flash", 
+          "gemini-1.5-flash",
+          "gemini-2.5-flash-preview-09-2025"
+        ] 
       : ["gemini-2.5-flash-preview-09-2025"];
 
     for (const modelEndpoint of modelsToTry) {
