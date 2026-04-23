@@ -1,8 +1,6 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
-import { 
-  Upload, FileText, GraduationCap, Table2, 
-  CheckCircle2, AlertCircle, Loader2, Filter, Download, FileSearch
-} from 'lucide-react';
 
 const apiKey = ""; // Provided by execution environment
 
@@ -63,7 +61,7 @@ export default function App() {
     
     if (selectedFiles.length === 0) return;
     
-    setStatusMsg("Processing files...");
+    setStatusMsg("[ SYSTEM ]: Processing files...");
     const processedImages = [];
     const processedTexts = [];
 
@@ -81,7 +79,7 @@ export default function App() {
       } 
       else if (file.type === 'application/pdf' || ext === 'pdf') {
         if (!window.pdfjsLib) {
-          setErrorMsg("PDF processor not ready yet. Please try again in a moment.");
+          setErrorMsg("ERROR: PDF processor not ready yet. Please try again.");
           setStatusMsg("");
           return;
         }
@@ -103,12 +101,12 @@ export default function App() {
           }
         } catch (err) {
           console.error("PDF processing error:", err);
-          setErrorMsg(`Error processing PDF: ${err.message}`);
+          setErrorMsg(`ERROR processing PDF: ${err.message}`);
         }
       } 
       else if (['xls', 'xlsx', 'csv'].includes(ext)) {
         if (!window.XLSX) {
-          setErrorMsg("Excel processor not ready yet. Please try again.");
+          setErrorMsg("ERROR: Excel processor not ready yet.");
           return;
         }
         try {
@@ -121,12 +119,12 @@ export default function App() {
           });
           processedTexts.push(documentText);
         } catch (err) {
-          setErrorMsg(`Error processing Excel file: ${err.message}`);
+          setErrorMsg(`ERROR processing Excel file: ${err.message}`);
         }
       }
       else if (ext === 'docx') {
         if (!window.mammoth) {
-          setErrorMsg("Word processor not ready yet. Please try again.");
+          setErrorMsg("ERROR: Word processor not ready yet.");
           return;
         }
         try {
@@ -134,14 +132,14 @@ export default function App() {
           const result = await window.mammoth.extractRawText({ arrayBuffer });
           processedTexts.push(`[Word Document: ${file.name}]\n${result.value}`);
         } catch (err) {
-          setErrorMsg(`Error processing Word file: ${err.message}`);
+          setErrorMsg(`ERROR processing Word file: ${err.message}`);
         }
       }
       else if (ext === 'doc') {
-        setErrorMsg(`Legacy .doc format cannot be parsed directly in the browser. Please save it as .docx or .pdf first.`);
+        setErrorMsg(`ERROR: Legacy .doc format cannot be parsed natively. Please use .docx or .pdf.`);
       } 
       else {
-        setErrorMsg(`Unsupported file type: ${file.name}`);
+        setErrorMsg(`ERROR: Unsupported file type: ${file.name}`);
       }
     }
     
@@ -163,7 +161,7 @@ export default function App() {
 
   const processPlanFiles = async (selectedFiles) => {
     if (selectedFiles.length === 0) return;
-    setStatusMsg("Extracting text from teaching plan...");
+    setStatusMsg("[ SYSTEM ]: Extracting plan text...");
     let extractedText = "";
 
     for (const file of selectedFiles) {
@@ -191,10 +189,10 @@ export default function App() {
            const text = await file.text();
            extractedText += text + "\n";
         } else {
-           setErrorMsg(`Could not extract text from ${file.name}. Ensure it's a PDF, Word, Excel, or Text file.`);
+           setErrorMsg(`ERROR: Could not extract from ${file.name}.`);
         }
       } catch (err) {
-         setErrorMsg(`Error reading plan: ${err.message}`);
+         setErrorMsg(`ERROR reading plan: ${err.message}`);
       }
     }
 
@@ -208,14 +206,14 @@ export default function App() {
 
   const analyzePaper = async () => {
     if (images.length === 0 && texts.length === 0) {
-      setErrorMsg("Please upload a paper or document first.");
+      setErrorMsg("ERROR: Upload a paper or document first.");
       return;
     }
     
     setIsAnalyzing(true);
     setErrorMsg("");
     setResults([]);
-    setStatusMsg("AI is analyzing the document. This may take a minute...");
+    setStatusMsg("[ SYSTEM ]: AI Analysis Initialized. Please wait...");
 
     const targetGrid = CAPS_TARGETS[paperType];
     const currentLabels = CAPS_LABELS[paperType];
@@ -314,7 +312,7 @@ export default function App() {
       } catch (err) {
         attempt++;
         if (attempt >= maxRetries) {
-          setErrorMsg(`Failed to analyze paper after multiple attempts. Error: ${err.message}`);
+          setErrorMsg(`ERROR: Failed analysis after retries. ${err.message}`);
         } else {
           await delay(delays[attempt - 1]);
         }
@@ -356,283 +354,595 @@ export default function App() {
   const generateRevisionPlan = () => {
     if (filteredQuestions.length === 0) return "";
     const qNumbers = filteredQuestions.map(q => q.qNum).join(", ");
-    return `Based on class performance, please review the following questions: ${qNumbers}.`;
+    return `[ ACTION PLAN ]: Focus revision on questions: ${qNumbers}.`;
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-800 pb-12">
-      {/* Header */}
-      <header className="bg-teal-700 text-white p-6 shadow-md">
-        <div className="max-w-7xl mx-auto flex items-center space-x-3">
-          <GraduationCap className="w-8 h-8" />
-          <div>
-            <h1 className="text-2xl font-bold">Assessment Analysis</h1>
-            <p className="text-teal-100 text-sm">Intelligent Curriculum & Cognitive Level Mapping</p>
-          </div>
-        </div>
-      </header>
+    <div className="cyber-root">
+      <style>{`
+        .cyber-root {
+          /* Enforce dark background on the outermost wrapper to prevent white flashes or body overrides */
+          background-color: #050508;
+          background-image: linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+          background-size: 50px 100%;
+          min-height: 100vh;
+          width: 100%;
+          color: #ffffff;
+          font-family: 'SF Mono', 'Courier New', Courier, monospace;
+          padding-bottom: 4rem;
+          box-sizing: border-box;
+        }
 
-      <main className="max-w-7xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
+        .cyber-layout {
+          max-width: 1100px;
+          margin: 0 auto;
+          padding: 3rem 1.5rem;
+        }
+
+        /* --- Typography & Hero (Matching Image) --- */
+        .status-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          border: 1px solid rgba(6, 182, 212, 0.3);
+          border-radius: 9999px;
+          padding: 6px 14px;
+          color: #06b6d4;
+          font-size: 0.75rem;
+          letter-spacing: 1px;
+          text-transform: uppercase;
+          margin-bottom: 1.5rem;
+          background: rgba(6, 182, 212, 0.05);
+        }
+        .status-badge .dot {
+          width: 6px;
+          height: 6px;
+          background-color: #06b6d4;
+          border-radius: 50%;
+          box-shadow: 0 0 8px #06b6d4;
+        }
+
+        .hero-title {
+          font-family: system-ui, -apple-system, sans-serif;
+          font-size: 4.5rem;
+          font-weight: 800;
+          line-height: 1.1;
+          margin: 0 0 2rem 0;
+          letter-spacing: -0.02em;
+          text-transform: uppercase;
+        }
+        @media (max-width: 768px) {
+          .hero-title { font-size: 3rem; }
+        }
+
+        .text-white { color: #ffffff; }
+        .text-magenta { 
+          color: #d946ef; 
+          text-shadow: 0 0 25px rgba(217, 70, 239, 0.4); 
+        }
+        .text-cyan { 
+          color: #06b6d4; 
+          text-shadow: 0 0 25px rgba(6, 182, 212, 0.4); 
+        }
+
+        .hero-subtitle {
+          color: #a1a1aa;
+          font-size: 1rem;
+          line-height: 1.6;
+          margin-bottom: 3rem;
+          border-left: 2px solid #d946ef;
+          padding-left: 1.25rem;
+          max-width: 600px;
+        }
+
+        /* --- Grid Layout --- */
+        .grid-container {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 2rem;
+        }
+        @media (min-width: 992px) {
+          .grid-container { grid-template-columns: 1fr 2fr; }
+        }
+
+        /* --- Panels & Boxes --- */
+        .cyber-panel {
+          background: rgba(10, 10, 15, 0.8);
+          backdrop-filter: blur(10px);
+          border: 1px solid #1f1f2e;
+          padding: 1.5rem;
+          border-radius: 4px;
+          margin-bottom: 1.5rem;
+        }
+        .panel-title {
+          font-size: 0.85rem;
+          color: #ffffff;
+          margin-top: 0;
+          margin-bottom: 1.25rem;
+          letter-spacing: 1px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        /* --- Inputs & Uploads --- */
+        .upload-zone {
+          border: 1px dashed #2d2d3b;
+          background: rgba(255, 255, 255, 0.01);
+          padding: 2.5rem 1rem;
+          text-align: center;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          border-radius: 4px;
+        }
+        .upload-zone:hover, .upload-zone.drag-active {
+          border-color: #06b6d4;
+          background: rgba(6, 182, 212, 0.05);
+        }
+        .upload-text {
+          font-size: 0.85rem;
+          color: #06b6d4;
+          display: block;
+          margin-bottom: 0.75rem;
+        }
+        .upload-subtext {
+          font-size: 0.75rem;
+          color: #64748b;
+        }
+
+        .cyber-input {
+          width: 100%;
+          background: #050508;
+          border: 1px solid #2d2d3b;
+          color: #ffffff;
+          font-family: inherit;
+          padding: 0.85rem;
+          font-size: 0.85rem;
+          border-radius: 4px;
+          box-sizing: border-box;
+          margin-bottom: 1rem;
+          transition: border-color 0.2s ease;
+        }
+        .cyber-input:focus {
+          outline: none;
+          border-color: #d946ef;
+        }
+        textarea.cyber-input {
+          resize: vertical;
+          min-height: 120px;
+          line-height: 1.5;
+        }
+
+        /* --- Buttons --- */
+        .btn-outline {
+          background: transparent;
+          border: 1px solid #06b6d4;
+          color: #06b6d4;
+          font-family: inherit;
+          padding: 1rem 1.5rem;
+          font-size: 0.85rem;
+          font-weight: bold;
+          letter-spacing: 1px;
+          cursor: pointer;
+          width: 100%;
+          transition: all 0.2s ease;
+          border-radius: 2px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+        }
+        .btn-outline:hover:not(:disabled) {
+          background: rgba(6, 182, 212, 0.1);
+          box-shadow: 0 0 15px rgba(6, 182, 212, 0.2);
+        }
+        .btn-outline:disabled {
+          border-color: #2d2d3b;
+          color: #64748b;
+          cursor: not-allowed;
+        }
         
-        {/* Left Column: Inputs */}
-        <div className="lg:col-span-1 space-y-6">
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-            <h2 className="text-lg font-semibold mb-4 flex items-center text-slate-700">
-              <Upload className="w-5 h-5 mr-2 text-teal-600" /> Upload Paper
-            </h2>
-            
-            <div 
-              className={`border-2 border-dashed rounded-lg p-6 text-center transition ${isDragging ? 'border-teal-500 bg-teal-50' : 'border-slate-300 hover:bg-slate-50'}`}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-            >
-              <input 
-                type="file" 
-                id="file-upload" 
-                multiple 
-                accept=".pdf, .png, .jpg, .jpeg, .doc, .docx, .xls, .xlsx, .csv, application/pdf, image/*"
-                className="hidden"
-                onChange={handleFileChange}
-              />
-              <label htmlFor="file-upload" className="cursor-pointer flex flex-col items-center">
-                <FileText className="w-10 h-10 text-slate-400 mb-2" />
-                <span className="text-sm font-medium text-slate-700">Click or drag files here to upload</span>
-                <span className="text-xs text-slate-500 mt-1">Supports PDF, Images, Word, and Excel</span>
-              </label>
-            </div>
-            
-            {files.length > 0 && (
-              <div className="mt-3 text-sm text-slate-600 flex items-center">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500 mr-2 shrink-0" />
-                {files.length} file(s) selected ({images.length} images, {texts.length} docs ready)
-              </div>
-            )}
-          </div>
+        .btn-small {
+          background: transparent;
+          border: 1px solid #2d2d3b;
+          color: #a1a1aa;
+          font-family: inherit;
+          padding: 0.35rem 0.85rem;
+          font-size: 0.75rem;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          border-radius: 2px;
+        }
+        .btn-small:hover {
+          color: #ffffff;
+          border-color: #ffffff;
+        }
+        .btn-small.active-topic {
+          border-color: #d946ef;
+          color: #d946ef;
+          background: rgba(217, 70, 239, 0.1);
+        }
+        .btn-small.active-level {
+          border-color: #06b6d4;
+          color: #06b6d4;
+          background: rgba(6, 182, 212, 0.1);
+        }
 
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold text-slate-700">Settings & Topics</h2>
-              <div>
+        /* --- Dashboard Metrics --- */
+        .metrics-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 1rem;
+          margin-bottom: 1.5rem;
+        }
+        @media (min-width: 768px) {
+          .metrics-grid { grid-template-columns: repeat(5, 1fr); }
+        }
+        .metric-card {
+          background: rgba(10, 10, 15, 0.8);
+          border: 1px solid #1f1f2e;
+          padding: 1.25rem 1rem;
+          text-align: center;
+          border-radius: 4px;
+        }
+        .metric-card.off-target {
+          border-color: #ef4444;
+          background: rgba(239, 68, 68, 0.05);
+        }
+        .metric-label {
+          font-size: 0.7rem;
+          color: #64748b;
+          margin-bottom: 0.75rem;
+          display: block;
+        }
+        .metric-value {
+          font-family: system-ui, -apple-system, sans-serif;
+          font-size: 1.75rem;
+          font-weight: 800;
+          color: #ffffff;
+          margin-bottom: 0.75rem;
+        }
+        .metric-value span {
+          font-size: 0.8rem;
+          font-weight: normal;
+          color: #64748b;
+        }
+        .progress-bar {
+          background: #1f1f2e;
+          height: 4px;
+          width: 100%;
+          border-radius: 2px;
+          position: relative;
+          margin-top: 0.5rem;
+        }
+        .progress-fill {
+          position: absolute;
+          left: 0;
+          top: 0;
+          height: 100%;
+          background: #06b6d4;
+          border-radius: 2px;
+        }
+        .metric-card.off-target .progress-fill { background: #ef4444; }
+        .progress-target {
+          position: absolute;
+          top: -2px;
+          bottom: -2px;
+          width: 2px;
+          background: #ffffff;
+          z-index: 10;
+        }
+        .progress-text {
+          display: flex;
+          justify-content: space-between;
+          font-size: 0.65rem;
+          margin-top: 0.5rem;
+          color: #64748b;
+        }
+
+        /* --- Table --- */
+        .table-container {
+          overflow-x: auto;
+          margin-top: 1rem;
+        }
+        .cyber-table {
+          width: 100%;
+          border-collapse: collapse;
+          font-size: 0.85rem;
+        }
+        .cyber-table th {
+          color: #64748b;
+          font-weight: normal;
+          text-align: left;
+          padding: 1rem;
+          border-bottom: 1px solid #2d2d3b;
+        }
+        .cyber-table td {
+          padding: 1rem;
+          border-bottom: 1px solid #1f1f2e;
+          color: #e2e8f0;
+          vertical-align: top;
+        }
+        .cyber-table tr:hover td {
+          background: rgba(255,255,255,0.02);
+        }
+        .level-badge {
+          font-size: 0.7rem;
+          padding: 0.25rem 0.5rem;
+          border: 1px solid #2d2d3b;
+          border-radius: 2px;
+          background: #050508;
+          color: #a1a1aa;
+        }
+
+        /* --- Utility --- */
+        .status-msg {
+          font-size: 0.8rem;
+          color: #06b6d4;
+          margin-top: 1rem;
+          text-align: center;
+        }
+        .error-msg {
+          font-size: 0.8rem;
+          color: #ef4444;
+          border: 1px solid #ef4444;
+          background: rgba(239, 68, 68, 0.1);
+          padding: 1rem;
+          margin-top: 1rem;
+          border-radius: 4px;
+        }
+        .flex-wrap { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem; }
+        .info-box {
+          background: #050508;
+          border: 1px solid #2d2d3b;
+          padding: 1.25rem;
+          border-radius: 4px;
+        }
+      `}</style>
+
+      <div className="cyber-layout">
+        <header>
+          <div className="status-badge">
+            <span className="dot"></span> READY TO ANALYZE
+          </div>
+          <h1 className="hero-title">
+            <span className="text-magenta">ASSESSMENT</span> <span className="text-cyan">ANALYSER</span>
+          </h1>
+          <div className="hero-subtitle">
+            An intelligent curriculum-aligned parser that evaluates<br/>
+            cognitive levels automatically. Upload it, analyze it,<br/>
+            review it—no manual grading required.
+          </div>
+        </header>
+
+        <main className="grid-container">
+          
+          {/* Left Column: Inputs */}
+          <div className="input-column">
+            
+            {/* Upload Panel */}
+            <div className="cyber-panel">
+              <h2 className="panel-title">// ASSESSMENT UPLOAD</h2>
+              <div 
+                className={`upload-zone ${isDragging ? 'drag-active' : ''}`}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+              >
+                <input 
+                  type="file" 
+                  id="file-upload" 
+                  multiple 
+                  accept=".pdf, .png, .jpg, .jpeg, .doc, .docx, .xls, .xlsx, .csv, application/pdf, image/*"
+                  style={{ display: 'none' }}
+                  onChange={handleFileChange}
+                />
+                <label htmlFor="file-upload" style={{ cursor: 'pointer', display: 'block' }}>
+                  <span className="upload-text">GET STARTED &rarr;</span>
+                  <span className="upload-subtext">Click or drag PDF, PNG, DOCX, XLSX here</span>
+                </label>
+              </div>
+              
+              {files.length > 0 && (
+                <div style={{ marginTop: '1rem', fontSize: '0.8rem', color: '#06b6d4' }}>
+                  {'>'} {files.length} FILE(S) QUEUED ({images.length} PAGES, {texts.length} DOCS)
+                </div>
+              )}
+            </div>
+
+            {/* Settings Panel */}
+            <div className="cyber-panel">
+              <div className="panel-title">
+                <span>// ATP UPLOAD</span>
                 <input 
                   type="file" 
                   id="plan-upload" 
                   accept=".pdf, .doc, .docx, .xls, .xlsx, .csv, .txt"
-                  className="hidden"
+                  style={{ display: 'none' }}
                   onChange={(e) => processPlanFiles(Array.from(e.target.files))}
                 />
-                <label htmlFor="plan-upload" className="cursor-pointer flex items-center text-xs font-medium text-teal-600 hover:text-teal-800 bg-teal-50 px-3 py-1.5 rounded-full transition">
-                  <Upload className="w-3 h-3 mr-1" /> Upload Plan
+                <label htmlFor="plan-upload" className="btn-small">
+                  [+ LOAD ATP]
                 </label>
               </div>
-            </div>
-            
-            <div className="mb-4">
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Cognitive Grid Target</label>
+              
+              <label style={{ display: 'block', fontSize: '0.75rem', color: '#64748b', marginBottom: '0.5rem' }}>
+                TARGET_MATRIX:
+              </label>
               <select 
-                className="w-full p-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:outline-none bg-slate-50 text-slate-700"
+                className="cyber-input"
                 value={paperType}
                 onChange={(e) => setPaperType(e.target.value)}
               >
-                <option value="physics">Physical Sciences - Paper 1 (Physics)</option>
-                <option value="chemistry">Physical Sciences - Paper 2 (Chemistry)</option>
-                <option value="math">Mathematics (Paper 1 & 2)</option>
+                <option value="physics">PHYSICAL SCIENCES - P1 (PHYSICS)</option>
+                <option value="chemistry">PHYSICAL SCIENCES - P2 (CHEMISTRY)</option>
+                <option value="math">MATHEMATICS (P1 & P2)</option>
               </select>
+
+              <label style={{ display: 'block', fontSize: '0.75rem', color: '#64748b', marginBottom: '0.5rem' }}>
+                CURRICULUM_TOPICS:
+              </label>
+              <textarea 
+                className="cyber-input"
+                value={teachingPlan}
+                onChange={(e) => setTeachingPlan(e.target.value)}
+                placeholder="Enter topics..."
+              />
             </div>
 
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Teaching Plan Topics</label>
-            <textarea 
-              className="w-full h-32 p-3 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:outline-none"
-              value={teachingPlan}
-              onChange={(e) => setTeachingPlan(e.target.value)}
-              placeholder="e.g., Newton's Laws..."
-            />
+            <button 
+              onClick={analyzePaper}
+              disabled={isAnalyzing || (images.length === 0 && texts.length === 0)}
+              className="btn-outline"
+            >
+              {isAnalyzing ? '[ PROCESSING... ]' : 'START ANALYSIS \u2192'}
+            </button>
+
+            {statusMsg && <div className="status-msg">{statusMsg}</div>}
+            {errorMsg && <div className="error-msg">{errorMsg}</div>}
+
           </div>
 
-          <button 
-            onClick={analyzePaper}
-            disabled={isAnalyzing || (images.length === 0 && texts.length === 0)}
-            className="w-full bg-teal-600 hover:bg-teal-700 disabled:bg-slate-300 text-white font-semibold py-3 px-4 rounded-xl shadow-sm transition flex items-center justify-center"
-          >
-            {isAnalyzing ? (
-              <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> Analyzing Document...</>
-            ) : (
-              <><FileSearch className="w-5 h-5 mr-2" /> Analyze Paper</>
-            )}
-          </button>
-
-          {statusMsg && (
-            <div className="text-sm text-teal-600 flex items-center justify-center font-medium text-center">
-               {statusMsg}
-            </div>
-          )}
-
-          {errorMsg && (
-            <div className="p-4 bg-red-50 text-red-700 rounded-lg text-sm flex items-start border border-red-200">
-              <AlertCircle className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" />
-              {errorMsg}
-            </div>
-          )}
-        </div>
-
-        {/* Right Column: Results & Dashboard */}
-        <div className="lg:col-span-2 space-y-6">
-          {results.length === 0 && !isAnalyzing ? (
-            <div className="h-full bg-white p-12 rounded-xl shadow-sm border border-slate-200 flex flex-col items-center justify-center text-center">
-              <Table2 className="w-16 h-16 text-slate-200 mb-4" />
-              <h3 className="text-xl font-medium text-slate-600 mb-2">No Analysis Yet</h3>
-              <p className="text-slate-400 max-w-md">Upload an exam paper and click analyze to generate a detailed cognitive level breakdown.</p>
-            </div>
-          ) : (
-            <>
-              {/* Summary Metrics */}
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-center items-center text-center">
-                  <span className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Total Marks</span>
-                  <span className="text-3xl font-extrabold text-teal-600">{totalMarks}</span>
+          {/* Right Column: Dashboard */}
+          <div className="dashboard-column">
+            {results.length === 0 && !isAnalyzing ? (
+              <div className="cyber-panel" style={{ textAlign: 'center', padding: '4rem 2rem' }}>
+                <div style={{ color: '#64748b', marginBottom: '1rem', letterSpacing: '2px' }}>
+                  [ AWAITING INPUT DATA ]
                 </div>
-                {[1, 2, 3, 4].map(level => {
-                  const marks = getMarksByLevel()[level];
-                  const percentage = totalMarks > 0 ? Math.round((marks / totalMarks) * 100) : 0;
-                  const target = CAPS_TARGETS[paperType][level];
-                  const diff = percentage - target;
-                  const isOffTarget = Math.abs(diff) > 5 && totalMarks > 0; 
-                  const label = CAPS_LABELS[paperType][level-1];
+                <p style={{ color: '#a1a1aa', fontSize: '0.9rem', lineHeight: '1.5' }}>
+                  Upload an assessment on the left to generate the cognitive mapping grid.
+                </p>
+              </div>
+            ) : (
+              <>
+                {/* Metrics */}
+                <div className="metrics-grid">
+                  <div className="metric-card" style={{ borderColor: '#d946ef', boxShadow: '0 0 10px rgba(217, 70, 239, 0.1)' }}>
+                    <span className="metric-label">TOTAL_MARKS</span>
+                    <div className="metric-value" style={{ color: '#d946ef' }}>{totalMarks}</div>
+                  </div>
                   
-                  return (
-                    <div key={level} className={`bg-white p-4 rounded-xl shadow-sm border ${isOffTarget ? 'border-amber-300 bg-amber-50/30' : 'border-slate-200'} flex flex-col justify-center items-center text-center relative`}>
-                      {isOffTarget && (
-                        <AlertCircle className="w-4 h-4 text-amber-500 absolute top-2 right-2" title={`Off target by ${diff > 0 ? '+' : ''}${diff}%`} />
-                      )}
-                      <span className="text-slate-500 text-[10px] font-bold uppercase tracking-wider mb-1 line-clamp-1">L{level}: {label}</span>
-                      <div className="text-xl font-bold text-slate-800">{marks} <span className="text-xs font-normal text-slate-400">marks</span></div>
-                      
-                      <div className="mt-2 w-full">
-                        <div className="flex justify-between text-[10px] font-medium mb-0.5">
-                          <span className="text-slate-500">Target: {target}%</span>
-                          <span className={isOffTarget ? 'text-amber-600 font-bold' : 'text-teal-600 font-bold'}>Actual: {percentage}%</span>
+                  {[1, 2, 3, 4].map(level => {
+                    const marks = getMarksByLevel()[level];
+                    const percentage = totalMarks > 0 ? Math.round((marks / totalMarks) * 100) : 0;
+                    const target = CAPS_TARGETS[paperType][level];
+                    const diff = percentage - target;
+                    const isOffTarget = Math.abs(diff) > 5 && totalMarks > 0; 
+                    const label = CAPS_LABELS[paperType][level-1];
+                    
+                    return (
+                      <div key={level} className={`metric-card ${isOffTarget ? 'off-target' : ''}`}>
+                        <span className="metric-label" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          L{level}: {label.split('/')[0]}
+                        </span>
+                        <div className="metric-value">{marks} <span>pts</span></div>
+                        
+                        <div className="progress-bar">
+                          <div className="progress-fill" style={{ width: `${percentage}%` }}></div>
+                          <div className="progress-target" style={{ left: `${target}%` }}></div>
                         </div>
-                        <div className="w-full bg-slate-200 rounded-full h-1.5 relative overflow-hidden">
-                          <div className={`absolute top-0 left-0 h-full rounded-full ${isOffTarget ? 'bg-amber-400' : 'bg-teal-500'}`} style={{ width: `${percentage}%` }}></div>
-                          <div className="absolute top-0 bottom-0 w-0.5 bg-slate-800 z-10" style={{ left: `${target}%` }}></div>
+                        
+                        <div className="progress-text">
+                          <span>TGT:{target}%</span>
+                          <span style={{ color: isOffTarget ? '#ef4444' : '#e2e8f0' }}>ACT:{percentage}%</span>
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Data Table */}
-              <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                <div className="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
-                  <h2 className="text-lg font-semibold text-slate-700 flex items-center">
-                    <Table2 className="w-5 h-5 mr-2 text-teal-600" /> Question Breakdown
-                  </h2>
+                    );
+                  })}
                 </div>
-                <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
-                  <table className="w-full text-left text-sm">
-                    <thead className="bg-slate-100 text-slate-600 sticky top-0 shadow-sm z-10">
-                      <tr>
-                        <th className="p-3 font-semibold">Q.</th>
-                        <th className="p-3 font-semibold">Topic</th>
-                        <th className="p-3 font-semibold">Marks</th>
-                        <th className="p-3 font-semibold">Level</th>
-                        <th className="p-3 font-semibold">Description</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-200">
-                      {results.map((q, idx) => (
-                        <tr key={idx} className="hover:bg-slate-50 transition">
-                          <td className="p-3 font-medium text-slate-800 whitespace-nowrap">{q.qNum}</td>
-                          <td className="p-3 text-slate-600">{q.topic}</td>
-                          <td className="p-3 font-medium text-teal-600">{q.marks}</td>
-                          <td className="p-3">
-                            <span className={`px-2 py-1 rounded text-xs font-medium 
-                              ${q.blooms === 1 ? 'bg-emerald-100 text-emerald-800' : 
-                                q.blooms === 2 ? 'bg-blue-100 text-blue-800' :
-                                q.blooms === 3 ? 'bg-amber-100 text-amber-800' :
-                                'bg-rose-100 text-rose-800'}`}>
-                              L{q.blooms}
-                            </span>
-                          </td>
-                          <td className="p-3 text-slate-500 text-xs">{q.description}</td>
+
+                {/* Table */}
+                <div className="cyber-panel">
+                  <h2 className="panel-title">// PARSED_DATA_GRID</h2>
+                  <div className="table-container">
+                    <table className="cyber-table">
+                      <thead>
+                        <tr>
+                          <th>Q#</th>
+                          <th>TOPIC</th>
+                          <th>PTS</th>
+                          <th>LVL</th>
+                          <th>DESCRIPTION</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {results.map((q, idx) => (
+                          <tr key={idx}>
+                            <td style={{ color: '#ffffff' }}>{q.qNum}</td>
+                            <td>{q.topic}</td>
+                            <td style={{ color: '#06b6d4', fontWeight: 'bold' }}>{q.marks}</td>
+                            <td><span className="level-badge">L{q.blooms}</span></td>
+                            <td style={{ color: '#a1a1aa', fontSize: '0.8rem', lineHeight: '1.4' }}>{q.description}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-              </div>
 
-              {/* Action Plan Generator */}
-              <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                <h2 className="text-lg font-semibold mb-4 text-slate-700 flex items-center">
-                  <Filter className="w-5 h-5 mr-2 text-teal-600" /> Target Weak Areas
-                </h2>
-                <p className="text-sm text-slate-500 mb-4">Select topics or cognitive levels where your class underperformed to generate a custom revision list.</p>
-                
-                <div className="flex flex-wrap gap-6 mb-6">
-                  <div>
-                    <h3 className="text-xs font-bold uppercase text-slate-400 mb-2">Filter by Topic</h3>
-                    <div className="flex flex-wrap gap-2">
+                {/* Weak Areas */}
+                <div className="cyber-panel">
+                  <h2 className="panel-title">// TARGETED_REVISION_GENERATOR</h2>
+                  
+                  <div style={{ marginBottom: '1.5rem' }}>
+                    <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.75rem' }}>
+                      FILTER_BY_TOPIC:
+                    </div>
+                    <div className="flex-wrap">
                       {uniqueTopics.map(topic => (
                         <button
                           key={topic}
                           onClick={() => toggleTopic(topic)}
-                          className={`px-3 py-1.5 rounded-full text-xs font-medium transition ${
-                            selectedTopics.includes(topic) 
-                            ? 'bg-teal-600 text-white' 
-                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                          }`}
+                          className={`btn-small ${selectedTopics.includes(topic) ? 'active-topic' : ''}`}
                         >
                           {topic}
                         </button>
                       ))}
                     </div>
-                  </div>
 
-                  <div>
-                    <h3 className="text-xs font-bold uppercase text-slate-400 mb-2">Filter by Level</h3>
-                    <div className="flex flex-wrap gap-2">
+                    <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.75rem', marginTop: '1rem' }}>
+                      FILTER_BY_LEVEL:
+                    </div>
+                    <div className="flex-wrap">
                       {[1, 2, 3, 4].map(level => (
                         <button
                           key={level}
                           onClick={() => toggleLevel(level)}
-                          className={`px-3 py-1.5 rounded-full text-xs font-medium transition ${
-                            selectedLevels.includes(level) 
-                            ? 'bg-teal-600 text-white' 
-                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                          }`}
+                          className={`btn-small ${selectedLevels.includes(level) ? 'active-level' : ''}`}
                         >
-                          Level {level}
+                          LEVEL {level}
                         </button>
                       ))}
                     </div>
                   </div>
+
+                  <div className="info-box">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                      <span style={{ fontSize: '0.8rem', color: '#06b6d4', letterSpacing: '1px' }}>OUTPUT:</span>
+                      <button 
+                        onClick={() => {
+                          navigator.clipboard.writeText(generateRevisionPlan());
+                          setStatusMsg("[ SYSTEM ]: Copied to clipboard!");
+                          setTimeout(() => setStatusMsg(""), 3000);
+                        }}
+                        className="btn-small"
+                      >
+                        [ COPY ]
+                      </button>
+                    </div>
+                    <p style={{ margin: 0, fontSize: '0.85rem', lineHeight: '1.5', color: '#e2e8f0' }}>
+                      {generateRevisionPlan() || "Select filters above to isolate questions for targeted revision."}
+                    </p>
+                  </div>
                 </div>
 
-                <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="text-sm font-semibold text-slate-700">Suggested Revision</h3>
-                    <button 
-                      onClick={() => {
-                        navigator.clipboard.writeText(generateRevisionPlan());
-                        setStatusMsg("Copied to clipboard!");
-                        setTimeout(() => setStatusMsg(""), 3000);
-                      }}
-                      className="text-teal-600 hover:text-teal-800 text-xs font-medium flex items-center"
-                    >
-                      <Download className="w-3 h-3 mr-1" /> Copy Text
-                    </button>
-                  </div>
-                  <p className="text-sm text-slate-700 font-medium">
-                    {generateRevisionPlan() || "Select filters above to generate a list."}
-                  </p>
-                </div>
-              </div>
-            </>
-          )}
-        </div>
-      </main>
+              </>
+            )}
+          </div>
+
+        </main>
+      </div>
     </div>
   );
 }
