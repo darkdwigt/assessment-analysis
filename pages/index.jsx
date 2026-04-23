@@ -32,14 +32,15 @@ export default function App() {
     math: ["Knowledge", "Routine Procedures", "Complex Procedures", "Problem Solving"]
   };
 
-  // Load external parsers dynamically and force global body styles
+  // Load external parsers dynamically and force global body styles aggressively
   useEffect(() => {
-    // Force override Next.js default margins and backgrounds
-    document.documentElement.style.backgroundColor = "#050508";
-    document.body.style.backgroundColor = "#050508";
-    document.body.style.margin = "0";
-    document.body.style.padding = "0";
-    document.body.style.backgroundImage = "none";
+    // Force override Next.js default margins and backgrounds with high priority
+    document.documentElement.style.setProperty('background-color', '#050508', 'important');
+    document.documentElement.style.setProperty('background-image', 'none', 'important');
+    document.body.style.setProperty('background-color', '#050508', 'important');
+    document.body.style.setProperty('background-image', 'none', 'important');
+    document.body.style.setProperty('margin', '0', 'important');
+    document.body.style.setProperty('padding', '0', 'important');
 
     const scriptPdf = document.createElement('script');
     scriptPdf.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
@@ -365,25 +366,31 @@ export default function App() {
   };
 
   return (
-    <div className="cyber-root">
+    <div className="cyber-root" style={{ position: 'absolute', top: 0, left: 0, width: '100%', minHeight: '100vh', backgroundColor: '#050508', backgroundImage: 'none', margin: 0, padding: 0, overflowX: 'hidden' }}>
       <style dangerouslySetInnerHTML={{ __html: `
-        /* Target global html and body to firmly remove browser margins and background lines */
-        html, body {
+        /* Target global html, body, and Next.js root element */
+        html, body, #__next {
           margin: 0 !important;
           padding: 0 !important;
           background-color: #050508 !important;
           background-image: none !important;
+          width: 100%;
+          height: 100%;
+        }
+
+        * {
+          box-sizing: border-box;
         }
 
         .cyber-root {
           /* Enforce dark background on the outermost wrapper to prevent white flashes or body overrides */
-          background-color: #050508;
+          background-color: #050508 !important;
+          background-image: none !important;
           min-height: 100vh;
           width: 100%;
           color: #ffffff;
           font-family: 'SF Mono', 'Courier New', Courier, monospace;
           padding-bottom: 4rem;
-          box-sizing: border-box;
         }
 
         .cyber-layout {
