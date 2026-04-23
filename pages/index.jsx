@@ -300,9 +300,10 @@ export default function App() {
     const delays = [1000, 2000, 4000, 8000, 16000];
     let success = false;
     
-    const activeKey = userApiKey || apiKey;
-    // SMART SWITCH: Use public model for user keys, use preview model for internal environment
-    const modelEndpoint = userApiKey ? "gemini-1.5-flash" : "gemini-2.5-flash-preview-09-2025";
+    // STRICT TRIM: Removes invisible spaces that break the URL and cause 404 errors
+    const activeKey = (userApiKey || apiKey).trim();
+    // SMART SWITCH: Use public 'latest' model for user keys to ensure compatibility
+    const modelEndpoint = userApiKey ? "gemini-1.5-flash-latest" : "gemini-2.5-flash-preview-09-2025";
 
     while (attempt < maxRetries && !success) {
       try {
@@ -315,7 +316,12 @@ export default function App() {
           }
         );
 
-        if (!response.ok) throw new Error(`API Error: ${response.status} ${response.statusText}`);
+        if (!response.ok) {
+          let extraInfo = "";
+          if (response.status === 404) extraInfo = " - URL/Model Not Found. Check if the API key is correct.";
+          if (response.status === 400) extraInfo = " - Bad Request. The API key might be invalid.";
+          throw new Error(`API Error: ${response.status} ${response.statusText}${extraInfo}`);
+        }
 
         const data = await response.json();
         const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -378,8 +384,8 @@ export default function App() {
   return (
     <div className="cyber-root" style={{ position: 'absolute', top: 0, left: 0, width: '100%', minHeight: '100vh', backgroundColor: '#050508', backgroundImage: 'none', margin: 0, padding: 0, overflowX: 'hidden' }}>
       <style dangerouslySetInnerHTML={{ __html: `
-        /* Import Inter for ultra-clean, modern, highly readable typography */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        /* Import Outfit for a distinct, geometric, incredibly modern cyber look */
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
 
         /* Target global html, body, and Next.js root element */
         html, body, #__next {
@@ -402,7 +408,7 @@ export default function App() {
           min-height: 100vh;
           width: 100%;
           color: #ffffff;
-          font-family: 'Inter', system-ui, -apple-system, sans-serif; /* CHANGED TO INTER */
+          font-family: 'Outfit', system-ui, -apple-system, sans-serif; /* CHANGED TO OUTFIT */
           padding-bottom: 4rem;
           line-height: 1.5;
         }
@@ -463,6 +469,7 @@ export default function App() {
         .hero-subtitle {
           color: #a1a1aa;
           font-size: 1rem;
+          font-weight: 300;
           line-height: 1.6;
           margin-bottom: 3rem;
           border-left: 2px solid #d946ef;
@@ -523,8 +530,9 @@ export default function App() {
           font-family: 'SF Mono', 'Courier New', Courier, monospace;
         }
         .upload-subtext {
-          font-size: 0.8rem;
+          font-size: 0.85rem;
           color: #64748b;
+          font-weight: 300;
         }
 
         .cyber-input {
@@ -532,9 +540,10 @@ export default function App() {
           background: #050508;
           border: 1px solid #2d2d3b;
           color: #ffffff;
-          font-family: 'Inter', system-ui, sans-serif;
+          font-family: 'Outfit', system-ui, sans-serif;
           padding: 0.85rem;
           font-size: 0.9rem;
+          font-weight: 400;
           border-radius: 6px;
           box-sizing: border-box;
           margin-bottom: 1rem;
@@ -555,9 +564,9 @@ export default function App() {
           background: transparent;
           border: 1px solid #06b6d4;
           color: #06b6d4;
-          font-family: 'Inter', system-ui, sans-serif;
+          font-family: 'Outfit', system-ui, sans-serif;
           padding: 1rem 1.5rem;
-          font-size: 0.9rem;
+          font-size: 0.95rem;
           font-weight: 600;
           letter-spacing: 0.5px;
           cursor: pointer;
@@ -583,9 +592,9 @@ export default function App() {
           background: transparent;
           border: 1px solid #2d2d3b;
           color: #a1a1aa;
-          font-family: 'Inter', system-ui, sans-serif;
+          font-family: 'Outfit', system-ui, sans-serif;
           padding: 0.35rem 0.85rem;
-          font-size: 0.8rem;
+          font-size: 0.85rem;
           font-weight: 500;
           cursor: pointer;
           transition: all 0.2s ease;
@@ -629,21 +638,21 @@ export default function App() {
         }
         .metric-label {
           font-size: 0.75rem;
-          font-weight: 500;
+          font-weight: 600;
           color: #64748b;
           margin-bottom: 0.75rem;
           display: block;
         }
         .metric-value {
-          font-family: system-ui, -apple-system, sans-serif;
+          font-family: 'Outfit', system-ui, -apple-system, sans-serif;
           font-size: 1.75rem;
-          font-weight: 800;
+          font-weight: 700;
           color: #ffffff;
           margin-bottom: 0.75rem;
         }
         .metric-value span {
           font-size: 0.8rem;
-          font-weight: normal;
+          font-weight: 400;
           color: #64748b;
         }
         .progress-bar {
@@ -674,7 +683,7 @@ export default function App() {
         .progress-text {
           display: flex;
           justify-content: space-between;
-          font-size: 0.7rem;
+          font-size: 0.75rem;
           font-weight: 500;
           margin-top: 0.5rem;
           color: #64748b;
@@ -692,7 +701,7 @@ export default function App() {
         }
         .cyber-table th {
           color: #64748b;
-          font-weight: 500;
+          font-weight: 600;
           text-align: left;
           padding: 1rem;
           border-bottom: 1px solid #2d2d3b;
@@ -702,12 +711,13 @@ export default function App() {
           border-bottom: 1px solid #1f1f2e;
           color: #e2e8f0;
           vertical-align: top;
+          font-weight: 300;
         }
         .cyber-table tr:hover td {
           background: rgba(255,255,255,0.02);
         }
         .level-badge {
-          font-size: 0.75rem;
+          font-size: 0.8rem;
           font-weight: 600;
           padding: 0.25rem 0.5rem;
           border: 1px solid #2d2d3b;
@@ -865,7 +875,7 @@ export default function App() {
                 <div style={{ color: '#64748b', marginBottom: '1rem', letterSpacing: '2px', fontFamily: "'SF Mono', 'Courier New', Courier, monospace" }}>
                   [ AWAITING INPUT DATA ]
                 </div>
-                <p style={{ color: '#a1a1aa', fontSize: '0.95rem', lineHeight: '1.6' }}>
+                <p style={{ color: '#a1a1aa', fontSize: '0.95rem', lineHeight: '1.6', fontWeight: 300 }}>
                   Upload an assessment on the left to generate the cognitive mapping grid.
                 </p>
               </div>
@@ -924,7 +934,7 @@ export default function App() {
                       <tbody>
                         {results.map((q, idx) => (
                           <tr key={idx}>
-                            <td style={{ color: '#ffffff', fontWeight: 500 }}>{q.qNum}</td>
+                            <td style={{ color: '#ffffff', fontWeight: 600 }}>{q.qNum}</td>
                             <td>{q.topic}</td>
                             <td style={{ color: '#06b6d4', fontWeight: 700 }}>{q.marks}</td>
                             <td><span className="level-badge">L{q.blooms}</span></td>
@@ -986,7 +996,7 @@ export default function App() {
                         [ COPY ]
                       </button>
                     </div>
-                    <p style={{ margin: 0, fontSize: '0.9rem', lineHeight: '1.6', color: '#e2e8f0' }}>
+                    <p style={{ margin: 0, fontSize: '0.9rem', lineHeight: '1.6', color: '#e2e8f0', fontWeight: 300 }}>
                       {generateRevisionPlan() || "Select filters above to isolate questions for targeted revision."}
                     </p>
                   </div>
