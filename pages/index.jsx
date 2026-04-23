@@ -295,56 +295,70 @@ export default function App() {
       }
     };
 
-    let attempt = 0;
-    const maxRetries = 5;
-    const delays = [1000, 2000, 4000, 8000, 16000];
     let success = false;
+    let finalError = "";
     
     // STRICT TRIM: Removes invisible spaces that break the URL and cause 404 errors
     const activeKey = (userApiKey || apiKey).trim();
-    // SMART SWITCH: Use public 'latest' model for user keys to ensure compatibility
-    const modelEndpoint = userApiKey ? "gemini-1.5-flash-latest" : "gemini-2.5-flash-preview-09-2025";
+    
+    // SMART FALLBACK: Google's endpoint availability varies. 
+    // This array automatically tries the best public models first, 
+    // and if it hits a 404, it instantly falls back to the next one!
+    const modelsToTry = userApiKey 
+      ? ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"] 
+      : ["gemini-2.5-flash-preview-09-2025"];
 
-    while (attempt < maxRetries && !success) {
-      try {
-        const response = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/${modelEndpoint}:generateContent?key=${activeKey}`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
+    for (const modelEndpoint of modelsToTry) {
+      if (success) break;
+      
+      let attempt = 0;
+      while (attempt < 3 && !success) {
+        try {
+          const response = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${modelEndpoint}:generateContent?key=${activeKey}`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            }
+          );
+
+          if (!response.ok) {
+            if (response.status === 404) throw new Error("MODEL_404");
+            if (response.status === 403) throw new Error("API Error 403: Forbidden. Your key may lack permissions or be region-locked.");
+            if (response.status === 400) throw new Error("API Error 400: Bad Request. Check if the API key is correct.");
+            throw new Error(`API Error ${response.status}: ${response.statusText}`);
           }
-        );
 
-        if (!response.ok) {
-          let extraInfo = "";
-          if (response.status === 404) extraInfo = " - URL/Model Not Found. Check if the API key is correct.";
-          if (response.status === 400) extraInfo = " - Bad Request. The API key might be invalid.";
-          throw new Error(`API Error: ${response.status} ${response.statusText}${extraInfo}`);
-        }
-
-        const data = await response.json();
-        const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
-        
-        if (textResponse) {
-          const parsedData = JSON.parse(textResponse);
-          setResults(parsedData);
-          success = true;
-        } else {
-          throw new Error("Invalid response format from AI.");
-        }
-      } catch (err) {
-        attempt++;
-        if (attempt >= maxRetries) {
-          setErrorMsg(`ERROR: Failed analysis after retries. ${err.message}`);
-        } else {
-          await delay(delays[attempt - 1]);
+          const data = await response.json();
+          const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
+          
+          if (textResponse) {
+            const parsedData = JSON.parse(textResponse);
+            setResults(parsedData);
+            success = true;
+          } else {
+            throw new Error("Invalid response format from AI.");
+          }
+        } catch (err) {
+          if (err.message === "MODEL_404") {
+            finalError = `ERROR: Model ${modelEndpoint} not found.`;
+            break; // Break the while loop to try the next model in the for loop
+          }
+          
+          attempt++;
+          finalError = err.message;
+          if (attempt < 3) await delay(2000 * attempt); // Backoff
         }
       }
     }
 
     setIsAnalyzing(false);
     setStatusMsg("");
+
+    if (!success) {
+      setErrorMsg(finalError || "ERROR: Could not connect to Gemini AI. Please check your API key.");
+    }
   };
 
   const totalMarks = results.reduce((sum, q) => sum + (q.marks || 0), 0);
