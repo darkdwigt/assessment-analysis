@@ -15,6 +15,7 @@ export default function App() {
   const [statusMsg, setStatusMsg] = useState("");
   const [isDragging, setIsDragging] = useState(false);
   const [paperType, setPaperType] = useState('physics');
+  const [userApiKey, setUserApiKey] = useState("");
   
   // Filtering state
   const [selectedTopics, setSelectedTopics] = useState([]);
@@ -213,6 +214,11 @@ export default function App() {
   const delay = (ms) => new Promise(res => setTimeout(res, ms));
 
   const analyzePaper = async () => {
+    if (!userApiKey && !apiKey) {
+      setErrorMsg("ERROR: Missing API Key. Please provide a Gemini API Key in the settings panel.");
+      return;
+    }
+    
     if (images.length === 0 && texts.length === 0) {
       setErrorMsg("ERROR: Upload a paper or document first.");
       return;
@@ -293,11 +299,12 @@ export default function App() {
     const maxRetries = 5;
     const delays = [1000, 2000, 4000, 8000, 16000];
     let success = false;
+    const activeKey = userApiKey || apiKey;
 
     while (attempt < maxRetries && !success) {
       try {
         const response = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`,
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${activeKey}`,
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -785,6 +792,17 @@ export default function App() {
                   [+ LOAD ATP]
                 </label>
               </div>
+              
+              <label style={{ display: 'block', fontSize: '0.75rem', color: '#64748b', marginBottom: '0.5rem' }}>
+                GEMINI_API_KEY:
+              </label>
+              <input 
+                type="password"
+                className="cyber-input"
+                value={userApiKey}
+                onChange={(e) => setUserApiKey(e.target.value)}
+                placeholder="Enter Gemini API Key..."
+              />
               
               <label style={{ display: 'block', fontSize: '0.75rem', color: '#64748b', marginBottom: '0.5rem' }}>
                 TARGET_MATRIX:
