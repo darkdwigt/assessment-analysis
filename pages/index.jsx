@@ -302,10 +302,9 @@ export default function App() {
     const activeKey = (userApiKey || apiKey).trim();
     
     // SMART FALLBACK: Google's endpoint availability varies. 
-    // This array automatically tries the best public models first, 
-    // and if it hits a 404, it instantly falls back to the next one!
+    // This array automatically tries the most stable public models first!
     const modelsToTry = userApiKey 
-      ? ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"] 
+      ? ["gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-pro", "gemini-1.0-pro"] 
       : ["gemini-2.5-flash-preview-09-2025"];
 
     for (const modelEndpoint of modelsToTry) {
