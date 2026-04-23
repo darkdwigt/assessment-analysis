@@ -303,8 +303,9 @@ export default function App() {
 
     while (attempt < maxRetries && !success) {
       try {
+        // FIXED: Switched endpoint to the standard gemini-1.5-flash model to prevent 404 errors with public API keys
         const response = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${activeKey}`,
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${activeKey}`,
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -375,6 +376,9 @@ export default function App() {
   return (
     <div className="cyber-root" style={{ position: 'absolute', top: 0, left: 0, width: '100%', minHeight: '100vh', backgroundColor: '#050508', backgroundImage: 'none', margin: 0, padding: 0, overflowX: 'hidden' }}>
       <style dangerouslySetInnerHTML={{ __html: `
+        /* Import Roboto for better readability */
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
         /* Target global html, body, and Next.js root element */
         html, body, #__next {
           margin: 0 !important;
@@ -396,7 +400,7 @@ export default function App() {
           min-height: 100vh;
           width: 100%;
           color: #ffffff;
-          font-family: 'SF Mono', 'Courier New', Courier, monospace;
+          font-family: 'Roboto', system-ui, sans-serif; /* CHANGED TO ROBOTO */
           padding-bottom: 4rem;
         }
 
@@ -420,6 +424,7 @@ export default function App() {
           text-transform: uppercase;
           margin-bottom: 1.5rem;
           background: rgba(6, 182, 212, 0.05);
+          font-family: 'SF Mono', 'Courier New', Courier, monospace; /* Keeping badge cyber style */
         }
         .status-badge .dot {
           width: 6px;
@@ -430,7 +435,7 @@ export default function App() {
         }
 
         .hero-title {
-          font-family: system-ui, -apple-system, sans-serif;
+          font-family: system-ui, -apple-system, sans-serif; /* PROTECTED TITLE FONT */
           font-size: 4.5rem;
           font-weight: 800;
           line-height: 1.1;
@@ -490,6 +495,7 @@ export default function App() {
           display: flex;
           justify-content: space-between;
           align-items: center;
+          font-family: 'SF Mono', 'Courier New', Courier, monospace; /* Keeping panel headers cyber style */
         }
 
         /* --- Inputs & Uploads --- */
@@ -511,6 +517,7 @@ export default function App() {
           color: #06b6d4;
           display: block;
           margin-bottom: 0.75rem;
+          font-family: 'SF Mono', 'Courier New', Courier, monospace;
         }
         .upload-subtext {
           font-size: 0.75rem;
@@ -522,7 +529,7 @@ export default function App() {
           background: #050508;
           border: 1px solid #2d2d3b;
           color: #ffffff;
-          font-family: inherit;
+          font-family: 'Roboto', system-ui, sans-serif;
           padding: 0.85rem;
           font-size: 0.85rem;
           border-radius: 4px;
@@ -545,7 +552,7 @@ export default function App() {
           background: transparent;
           border: 1px solid #06b6d4;
           color: #06b6d4;
-          font-family: inherit;
+          font-family: 'Roboto', system-ui, sans-serif;
           padding: 1rem 1.5rem;
           font-size: 0.85rem;
           font-weight: bold;
@@ -573,7 +580,7 @@ export default function App() {
           background: transparent;
           border: 1px solid #2d2d3b;
           color: #a1a1aa;
-          font-family: inherit;
+          font-family: 'Roboto', system-ui, sans-serif;
           padding: 0.35rem 0.85rem;
           font-size: 0.75rem;
           cursor: pointer;
@@ -708,6 +715,7 @@ export default function App() {
           color: #06b6d4;
           margin-top: 1rem;
           text-align: center;
+          font-family: 'SF Mono', 'Courier New', Courier, monospace;
         }
         .error-msg {
           font-size: 0.8rem;
@@ -845,7 +853,7 @@ export default function App() {
           <div className="dashboard-column">
             {results.length === 0 && !isAnalyzing ? (
               <div className="cyber-panel" style={{ textAlign: 'center', padding: '4rem 2rem' }}>
-                <div style={{ color: '#64748b', marginBottom: '1rem', letterSpacing: '2px' }}>
+                <div style={{ color: '#64748b', marginBottom: '1rem', letterSpacing: '2px', fontFamily: "'SF Mono', 'Courier New', Courier, monospace" }}>
                   [ AWAITING INPUT DATA ]
                 </div>
                 <p style={{ color: '#a1a1aa', fontSize: '0.9rem', lineHeight: '1.5' }}>
