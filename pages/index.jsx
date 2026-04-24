@@ -16,6 +16,7 @@ export default function App() {
   const [isDragging, setIsDragging] = useState(false);
   const [paperType, setPaperType] = useState('physics');
   const [userApiKey, setUserApiKey] = useState("");
+  const [atpFileName, setAtpFileName] = useState("");
   
   // Filtering state
   const [selectedTopics, setSelectedTopics] = useState([]);
@@ -207,6 +208,7 @@ export default function App() {
 
     if (extractedText.trim()) {
       setTeachingPlan(extractedText.trim());
+      setAtpFileName(selectedFiles.map(f => f.name).join(', '));
     }
     setStatusMsg("");
   };
@@ -839,6 +841,11 @@ export default function App() {
                   [+ LOAD ATP]
                 </label>
               </div>
+              {atpFileName && (
+                <div style={{ marginTop: '0.5rem', fontSize: '0.85rem', fontWeight: 500, color: '#06b6d4' }}>
+                  {'>'} ATP LOADED: {atpFileName}
+                </div>
+              )}
               
               <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#64748b', marginBottom: '0.5rem' }}>
                 GEMINI_API_KEY:
