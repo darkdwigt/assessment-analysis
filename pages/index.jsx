@@ -327,11 +327,13 @@ export default function App() {
           );
 
           if (!response.ok) {
+            const errBody = await response.json().catch(() => null);
+            const errDetail = errBody?.error?.message || response.statusText;
             if (response.status === 404) throw new Error("MODEL_404");
-            if (response.status === 429) throw new Error("RATE_LIMIT");
-            if (response.status === 403) throw new Error("API Error 403: Forbidden. Your key may lack permissions or be region-locked.");
-            if (response.status === 400) throw new Error("API Error 400: Bad Request. Check if the API key is correct.");
-            throw new Error(`API Error ${response.status}: ${response.statusText}`);
+            if (response.status === 429) throw new Error(`AI quota reached: ${errDetail}`);
+            if (response.status === 403) throw new Error(`API Error 403: ${errDetail}`);
+            if (response.status === 400) throw new Error(`API Error 400: ${errDetail}`);
+            throw new Error(`API Error ${response.status}: ${errDetail}`);
           }
 
           const data = await response.json();
@@ -349,8 +351,8 @@ export default function App() {
             finalError = `ERROR: Model ${modelEndpoint} not found.`;
             break;
           }
-          if (err.message === "RATE_LIMIT") {
-            finalError = "AI quota reached. Please wait a minute and try again.";
+          if (err.message.startsWith("AI quota reached")) {
+            finalError = err.message;
             break;
           }
 
